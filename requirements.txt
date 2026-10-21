@@ -1,0 +1,2 @@
+# OS trust store is retained; certifi adds an up-to-date CA bundle.
+certifi>=2024.8.30,<2027
