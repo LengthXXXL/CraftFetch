@@ -17,9 +17,11 @@ from dataclasses import dataclass
 from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
+from . import __version__
+
 MANIFEST_URL = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"
 MIRROR = "https://bmclapi2.bangbang93.com"
-USER_AGENT = "CraftFetch/0.1.0 (Minecraft Java downloader)"
+USER_AGENT = f"CraftFetch/{__version__} (Minecraft Java downloader)"
 
 
 class Cancelled(Exception):

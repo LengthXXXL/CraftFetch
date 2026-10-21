@@ -54,6 +54,13 @@ jobs:
           archive = pathlib.Path(shutil.make_archive(str(output / 'CraftFetch-${{ runner.os }}-${{ runner.arch }}'), 'zip', 'package'))
           digest = hashlib.sha256(archive.read_bytes()).hexdigest()
           (output / (archive.name + '.sha256')).write_text(f'{digest}  {archive.name}\n')
+      - name: Build one-click Windows installer
+        if: runner.os == 'Windows'
+        run: python -m tools.build_installer
+      - name: Test one-click install, launch, reinstall and uninstall
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./tests/windows_installer.ps1
       - uses: actions/upload-artifact@v4
         with:
           name: CraftFetch-${{ runner.os }}-${{ runner.arch }}

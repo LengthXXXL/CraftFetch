@@ -2,7 +2,19 @@
 
 独立的 Minecraft Java 版原版下载器。将游戏文件安装到标准 `.minecraft` 目录，再由 PCL、PCL-CE 或其他支持此目录结构的启动器识别和启动。
 
-[下载 Windows x64 测试版](https://github.com/LengthXXXL/CraftFetch/releases/tag/v0.1.0) · [实际验证记录](VALIDATION.md)
+**[一键安装 Windows 64 位版](https://github.com/LengthXXXL/CraftFetch/releases/download/v0.1.1/CraftFetch-Setup-0.1.1-Windows-x64.exe)** · [发布页与便携版](https://github.com/LengthXXXL/CraftFetch/releases/tag/v0.1.1) · [实际验证记录](VALIDATION.md)
+
+## 一键安装（推荐）
+
+1. 下载上面的 `CraftFetch-Setup-0.1.1-Windows-x64.exe`，双击打开。
+2. 点击 **“一键安装”**，安装完成后下载器会自动打开。
+3. 以后直接使用桌面或开始菜单中的 **CraftFetch** 快捷方式。
+
+支持 Windows 10 / 11 64 位。**不需要安装 Python、解压文件或输入命令，也不需要管理员权限。** 安装包已包含运行环境，安装过程无需联网；下载游戏时需要网络。
+
+程序默认安装到当前用户的 `%LOCALAPPDATA%\Programs\CraftFetch`。以后运行新版安装包即可覆盖更新；可在 Windows“设置 → 应用 → 已安装的应用”中卸载，下载到游戏目录的文件会保留。
+
+不想安装也可以在发布页下载便携 ZIP，解压后直接运行 `CraftFetch.exe`。
 
 这是独立编写的第三方工具，与 PCL、Mojang、Microsoft 无隶属关系。项目不包含 PCL 源码、游戏二进制或账号凭据。
 
@@ -20,13 +32,6 @@
 
 ## 使用桌面界面
 
-开发环境需要 Python 3.10 或更新版本，且包含 Tkinter。Windows 的 Python 官方安装包通常已包含 Tkinter；Linux 可能需要安装 `python3-tk`。
-
-```sh
-python -m pip install -r requirements.txt
-python -m craftfetch
-```
-
 1. 选择正式版或勾选“包含快照 / 预览版”，可搜索版本号。
 2. 选择 PCL 实际使用的 `.minecraft` 文件夹，也可以创建一个新的专用目录。
 3. 点击“下载所选版本”，等待校验完成。
@@ -37,7 +42,16 @@ PCL 如果使用了自定义游戏目录，请以 PCL 中显示的路径为准�
 
 网络超时或镜像不可用时，可取消后换源重试。取消会等待正在进行的网络读取结束，最长可能需要一个连接超时时间；完整文件保留，临时碎片清理。若任务被操作系统强制结束，可能留下以 `.craftfetch-` 开头的临时文件；关闭下载器后可以删除这些临时文件。
 
-## 命令行
+## 从源码运行（开发者，可选）
+
+普通用户使用上面的一键安装包即可。源码开发需要 Python 3.10 或更新版本，且包含 Tkinter。Windows 的 Python 官方安装包通常已包含 Tkinter；Linux 可能需要安装 `python3-tk`。
+
+```sh
+python -m pip install -r requirements.txt
+python -m craftfetch
+```
+
+## 命令行（可选）
 
 ```sh
 # 列出正式版本
@@ -69,11 +83,14 @@ python -m tools.live_smoke --version 1.20.1
 # 必须在目标系统上构建对应系统的程序
 python -m pip install -r requirements-build.txt
 python -m PyInstaller --clean --noconfirm --onefile --windowed --name CraftFetch --collect-all certifi run.py
+
+# Windows 上额外生成一键安装包（需要 Inno Setup 6.3 或更新版本）
+python -m tools.build_installer
 ```
 
 Windows 构建结果为 `dist/CraftFetch.exe`。`.exe` 自带 Python 和 Tkinter，用户不需要安装 Python。macOS / Linux 的产物分别对应其构建系统，不能当成 Windows 程序使用。桌面打包默认不带控制台，命令行使用建议直接运行源码。
 
-[构建工作流](.github/workflows/build.yml)会在 Windows、macOS、Linux 上运行测试、检查界面并构建程序，生成含程序、说明、许可的 ZIP 和 SHA-256 文件，放在 Actions 的 Artifacts 中。工作流**不会自动发布 GitHub Release**。未签名的初版程序可能触发系统的来源确认。
+[构建工作流](.github/workflows/build.yml)会在 Windows、macOS、Linux 上运行测试、检查界面并构建程序，生成含程序、说明、许可的便携 ZIP 和 SHA-256 文件。Windows 还会生成一键安装 EXE 和 SHA-256 文件，并实际验证点击一次安装、自动启动、快捷方式、再次安装和卸载。所有产物放在 Actions 的 Artifacts 中。工作流**不会自动发布 GitHub Release**。未签名的程序可能触发系统的来源确认。
 
 ## 数据来源与许可
 
