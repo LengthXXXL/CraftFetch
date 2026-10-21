@@ -21,7 +21,7 @@ from . import __version__
 
 MANIFEST_URL = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"
 MIRROR = "https://bmclapi2.bangbang93.com"
-USER_AGENT = f"CraftFetch/{__version__} (Minecraft Java downloader)"
+USER_AGENT = f"LengthXXXL/CraftFetch/{__version__} (github.com/LengthXXXL/CraftFetch)"
 
 
 class Cancelled(Exception):
@@ -79,6 +79,21 @@ class File:
     url: str
     sha1: str
     size: int
+    sha256: str = ""
+    sha512: str = ""
+    alternatives: tuple[str, ...] = ()
+
+    def hashes(self):
+        result = {}
+        for algorithm in ("sha1", "sha256", "sha512"):
+            value = getattr(self, algorithm)
+            if value:
+                if not re.fullmatch(r"[0-9a-f]{%d}" % (hashlib.new(algorithm).digest_size * 2), value):
+                    raise DownloadError(f"无效的 {algorithm} 校验值：{self.path}")
+                result[algorithm] = hashlib.new(algorithm)
+        if not result:
+            raise DownloadError(f"缺少文件校验值：{self.path}")
+        return result
 
 
 @dataclass
@@ -193,7 +208,7 @@ class Downloader:
                         self.check_cancel()
         raise DownloadError("所有下载尝试均失败：\n" + "\n".join(errors[-3:]))
 
-    def json_bytes(self, url, expected=None, size=None):
+    def json_bytes(self, url, expected=None, size=None, *, container=dict):
         def consume(response):
             data = bytearray()
             while True:
@@ -213,9 +228,25 @@ class Downloader:
                 parsed = json.loads(result)
             except (ValueError, UnicodeError) as exc:
                 raise DownloadError("服务器返回的不是有效 JSON") from exc
-            if not isinstance(parsed, dict):
+            if not isinstance(parsed, container):
                 raise DownloadError("元数据格式错误")
             return parsed, result
+        return self._fetch(url, consume)
+
+    def api(self, url):
+        return self.json_bytes(url, container=(dict, list))[0]
+
+    def small_bytes(self, url, limit=1024 * 1024):
+        def consume(response):
+            data = bytearray()
+            while True:
+                self.check_cancel()
+                chunk = response.read(128 * 1024)
+                if not chunk:
+                    return bytes(data)
+                data.extend(chunk)
+                if len(data) > limit:
+                    raise DownloadError("响应超过允许的大小")
         return self._fetch(url, consume)
 
     def manifest(self):
@@ -288,17 +319,18 @@ class Downloader:
                     metadata.get("javaVersion", {}).get("majorVersion"))
 
     def valid(self, path: Path, item: File):
-        if not path.is_file() or path.stat().st_size != item.size:
+        digests = item.hashes()
+        if not path.is_file() or (item.size >= 0 and path.stat().st_size != item.size):
             return False
-        digest = hashlib.sha1()
         with path.open("rb") as handle:
             while True:
                 self.check_cancel()
                 chunk = handle.read(1024 * 1024)
                 if not chunk:
                     break
-                digest.update(chunk)
-        return digest.hexdigest() == item.sha1
+                for digest in digests.values():
+                    digest.update(chunk)
+        return all(d.hexdigest() == getattr(item, name) for name, d in digests.items())
 
     def download(self, root: Path, item: File):
         target = safe_path(root, item.path)
@@ -310,7 +342,7 @@ class Downloader:
             fd, name = tempfile.mkstemp(prefix=".craftfetch-", suffix=".part", dir=target.parent)
             part = Path(name)
             try:
-                digest = hashlib.sha1()
+                digests = item.hashes()
                 received = 0
                 with os.fdopen(fd, "wb") as output:
                     while True:
@@ -319,19 +351,27 @@ class Downloader:
                         if not chunk:
                             break
                         received += len(chunk)
-                        if received > item.size:
+                        if received > (item.size if item.size >= 0 else 2 * 1024 ** 3):
                             raise DownloadError("服务器返回的文件超过预期大小")
-                        digest.update(chunk)
+                        for digest in digests.values():
+                            digest.update(chunk)
                         output.write(chunk)
                     output.flush()
                 self.check_cancel()
-                if received != item.size or digest.hexdigest() != item.sha1:
+                if ((item.size >= 0 and received != item.size)
+                        or any(d.hexdigest() != getattr(item, n) for n, d in digests.items())):
                     raise DownloadError(f"文件完整性校验失败：{item.path}")
                 os.replace(part, target)
                 return "downloaded"
             finally:
                 part.unlink(missing_ok=True)
-        return self._fetch(item.url, consume)
+        errors = []
+        for url in dict.fromkeys((item.url, *item.alternatives)):
+            try:
+                return self._fetch(url, consume)
+            except DownloadError as exc:
+                errors.append(str(exc))
+        raise DownloadError("\n".join(errors))
 
     @staticmethod
     def _write(path: Path, data: bytes):

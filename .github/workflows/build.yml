@@ -9,6 +9,26 @@ permissions:
   contents: read
 
 jobs:
+  content-integration:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      PYTHONPATH: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: python -m pip install -r requirements.txt
+      - name: Real content, Java, modpack, Forge and NeoForge integration
+        run: python -m tools.content_smoke --forge --pack-install --report artifacts/content-live-Windows.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: CraftFetch-content-integration
+          path: artifacts/*
+          if-no-files-found: warn
   build:
     env:
       PYTHONPATH: .

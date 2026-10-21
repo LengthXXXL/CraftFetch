@@ -1,100 +1,142 @@
 # CraftFetch
 
-独立的 Minecraft Java 版原版下载器。将游戏文件安装到标准 `.minecraft` 目录，再由 PCL、PCL-CE 或其他支持此目录结构的启动器识别和启动。
+独立的 Minecraft Java 版下载器：原版、Mod、整合包、数据包、资源包、光影包、加载器和 Java。下载到标准 `.minecraft` 文件夹，再交给 PCL 或其他启动器启动。
 
-**[一键安装 Windows 64 位版](https://github.com/LengthXXXL/CraftFetch/releases/download/v0.1.1/CraftFetch-Setup-0.1.1-Windows-x64.exe)** · [发布页与便携版](https://github.com/LengthXXXL/CraftFetch/releases/tag/v0.1.1) · [实际验证记录](VALIDATION.md)
+**[一键安装 Windows 64 位版](https://github.com/LengthXXXL/CraftFetch/releases/download/v0.2.0/CraftFetch-Setup-0.2.0-Windows-x64.exe)** · [发布页 / 便携版](https://github.com/LengthXXXL/CraftFetch/releases/tag/v0.2.0) · [验证记录](VALIDATION.md)
 
-## 一键安装（推荐）
+## 一键安装
 
-1. 下载上面的 `CraftFetch-Setup-0.1.1-Windows-x64.exe`，双击打开。
-2. 点击 **“一键安装”**，安装完成后下载器会自动打开。
-3. 以后直接使用桌面或开始菜单中的 **CraftFetch** 快捷方式。
+下载 EXE，双击后点击“一键安装”，完成后自动打开。支持 Windows 10 / 11 x64，无需 Python、命令行或管理员权限。程序安装到 `%LOCALAPPDATA%\Programs\CraftFetch`；运行新版安装包可覆盖更新。卸载程序会保留外部游戏目录。
 
-支持 Windows 10 / 11 64 位。**不需要安装 Python、解压文件或输入命令，也不需要管理员权限。** 安装包已包含运行环境，安装过程无需联网；下载游戏时需要网络。
+## 创建游戏或 Mod 实例
 
-程序默认安装到当前用户的 `%LOCALAPPDATA%\Programs\CraftFetch`。以后运行新版安装包即可覆盖更新；可在 Windows“设置 → 应用 → 已安装的应用”中卸载，下载到游戏目录的文件会保留。
+1. 选择 PCL 使用的 `.minecraft` **根目录**，不要选其内部的 `versions` 文件夹。
+2. 在“游戏与加载器”中选 Minecraft 版本，再选 `vanilla`（原版）、`fabric`、`quilt`、`forge` 或 `neoforge`。
+3. 加载器版本留空时自动选择；也可填写准确版本号。填写一个新的实例名称，点击“创建并下载实例”。
+4. 默认按 Mojang 版本元数据部署对应的 Windows x64 Java，保存在游戏根目录的 `runtime` 内。
+5. 在 PCL 中添加 / 选择同一个游戏根目录，刷新版本，选择刚创建的实例。**在该版本设置中启用游戏目录隔离，使用版本文件夹。**
+6. 若 PCL 未自动发现 Java，在该版本的 Java 设置中选择程序显示的 `javaw.exe`。也可在“Java 管理”中复制路径。
 
-不想安装也可以在发布页下载便携 ZIP，解压后直接运行 `CraftFetch.exe`。
+每个实例附带 `CraftFetch-导入说明.txt`。新实例名需使用英文字母、数字、点、横线或下划线，不能与已有目录重名，也不能直接用原版版本号。原版基础版本会保留，供其他实例复用。
 
-这是独立编写的第三方工具，与 PCL、Mojang、Microsoft 无隶属关系。项目不包含 PCL 源码、游戏二进制或账号凭据。
+## 下载 Mod、数据包、资源包和光影
 
-## 首版范围
+1. 进入“资源与整合包”，选择**目标实例**。MC 版本和加载器筛选会根据实例填写；若目录内没有实例，先创建一个。
+2. 选择资源类型，输入关键词后搜索。双击项目或点击“读取所选项目版本”，再选择具体版本。
+3. 点击“安装所选资源”。程序检查实际下载版本的类型、MC 版本和 Mod 加载器，并自动解析必需依赖；不会安装推荐 / 可选依赖。
+4. **数据包需要先在游戏里创建存档**，然后刷新本地实例、选择存档。数据包写入该存档的 `datapacks`，重新进入存档或使用 `/reload` 后加载。
+5. 资源包和光影包仍需在游戏设置中启用。光影需要匹配的 Iris / OptiFine 等支持，下载光影文件本身不会自动启用光影。
 
-- 原生桌面界面：选择版本、筛选快照、搜索、选择游戏目录、查看进度、取消和重试。
-- 标准目录：`versions/<版本>/<版本>.json` / `.jar`、`libraries`、`assets/indexes`、`assets/objects`。
-- 按 **Windows x64** 规则下载原版游戏、本地库和依赖库，包括旧资源的 virtual / resources 映射。
-- 官方源与 [BMCLAPI 镜像](https://bmclapidoc.bangbang93.com/)；选择镜像时，镜像失败或校验不通过会回退到官方源。选择官方源时只访问官方源。
-- 每个游戏文件核对 Mojang 元数据提供的 SHA-1 和长度；已校验的完整文件会复用，损坏的文件会重新下载。
-- 最多 6 个默认并行任务，失败自动重试 3 次。重试可复用完整文件，**不支持未完成单个文件的 HTTP Range 续传**。
-- 新安装只有全部文件成功后才写入启动器可识别的版本 JSON；已有不同配置不会覆盖。同目录只允许一个安装任务。
+当前资源源为 **Modrinth**，无需 API Key。支持识别同一项目的 Mod / 数据包等不同发布形式。搜索显示前 30 个结果，可增加关键词缩小范围。Mod 应装入匹配加载器的实例；本工具不会因为下载一个 Mod 就把原版实例改成 Fabric / Forge。
 
-首版暂不包含 Forge / NeoForge / Fabric / Quilt、整合包、模组管理、Java 自动安装和游戏启动。远古版本若没有标准资源索引会明确提示不支持。下载器可在 Windows、macOS 和 Linux 上运行，但**首版下载的游戏文件均面向 Windows x64**，不代表支持在 macOS / Linux 上启动这些游戏。
+已有的同名不同内容文件会保留并报出冲突。对本工具记录过的资源，不会自动替换为其他版本，以避免残留两份 Mod；需要升级时请使用新实例，或先备份、移走旧文件并清理实例内 `craftfetch-content.json` 的对应记录。依赖版本冲突或明确的不兼容关系会报错；未记录的手动添加文件、作者未声明的冲突仍需自行判断。整合包内资源由整合包统一管理，追加资源时尤其应检查已有 Mod。
 
-## 使用桌面界面
+## 下载 / 导入整合包
 
-1. 选择正式版或勾选“包含快照 / 预览版”，可搜索版本号。
-2. 选择 PCL 实际使用的 `.minecraft` 文件夹，也可以创建一个新的专用目录。
-3. 点击“下载所选版本”，等待校验完成。
-4. 在 PCL 的版本选择页面添加 / 选择同一个游戏目录，并刷新版本列表。
-5. 按提示自行安装对应 Java，并使用启动器登录自己的游戏账号后启动。
+- 在线：选择“整合包”，设置 MC 版本和加载器筛选（可清空加载器），搜索项目、读取版本、填写**整合包新实例名**，安装。
+- 本地：填写整合包新实例名，点击“导入本地 .mrpack”。
+- 自动读取 `.mrpack` 中的原版和加载器版本，安装依赖及 Java，再下载客户端文件，应用 `overrides` 和 `client-overrides`。忽略独立服务器文件。
+- 默认跳过客户端可选文件；可勾选“包含整合包可选文件”将它们全部安装。
+- 完成后生成 PCL 可识别的独立版本目录，**无需再让 PCL 下载或导入整合包**。按上面的步骤选择目录、实例并启用版本隔离即可。
 
-PCL 如果使用了自定义游戏目录，请以 PCL 中显示的路径为准，不要只凭文件夹名称猜测。首次测试建议使用新目录。下载器不会读取账号、修改存档或修改启动器设置。不同启动器的具体版本仍需要实机验证；标准目录兼容不等于保证每个版本都兼容。
+目前支持 **Modrinth `.mrpack`**；不支持 CurseForge `manifest.json` ZIP、服务端包、任意 ZIP 的自动识别或格式转换。请下载对应的 `.mrpack` 格式。
 
-网络超时或镜像不可用时，可取消后换源重试。取消会等待正在进行的网络读取结束，最长可能需要一个连接超时时间；完整文件保留，临时碎片清理。若任务被操作系统强制结束，可能留下以 `.craftfetch-` 开头的临时文件；关闭下载器后可以删除这些临时文件。
+## 文件位置
 
-## 从源码运行（开发者，可选）
+```text
+.minecraft/
+  assets/                         # 原版资源，实例间复用
+  libraries/                      # 原版与加载器依赖
+  runtime/java-17-windows-x64/     # 自动部署的 Java，主版本按游戏确定
+    bin/javaw.exe
+  versions/
+    1.20.1/                       # 原版基础版本
+    My-Fabric/
+      My-Fabric.json
+      My-Fabric.jar
+      mods/
+      resourcepacks/
+      shaderpacks/
+      saves/存档名/datapacks/
+      craftfetch-instance.json
+      craftfetch-content.json
+      CraftFetch-导入说明.txt
+  .craftfetch/                    # 可校验缓存、临时目录、安装日志和写入锁
+```
 
-普通用户使用上面的一键安装包即可。源码开发需要 Python 3.10 或更新版本，且包含 Tkinter。Windows 的 Python 官方安装包通常已包含 Tkinter；Linux 可能需要安装 `python3-tk`。
+迁移时复制**整个 `.minecraft`**，因为 `assets`、`libraries` 和 Java 位于实例目录之外。PCL 中重新选择迁移后的目录及 Java 路径。程序不会修改 PCL 的配置或账号，不提供游戏登录和启动。
+
+## 支持范围与下载行为
+
+- 游戏文件与 Java 的目标平台均为 **Windows x64**。macOS / Linux 版本可准备 Windows 文件，不能用它们在本机启动游戏；Forge / NeoForge 安装器需要在 Windows 中执行。
+- Fabric / Quilt 使用官方元数据和 Maven 依赖。Forge 自动安装支持 **Minecraft 1.13+**；NeoForge 使用现代 `net.neoforged:neoforge` 安装器（1.20.2+），1.20.1 的旧 NeoForge 坐标不在当前范围。以加载器官方实际支持的游戏版本为准。
+- Java 使用 Eclipse Adoptium / Temurin 的 Windows x64 ZIP，无需管理员权限，不修改系统 PATH / JAVA_HOME。按游戏元数据选择主版本（旧元数据缺省 Java 8）；某个主版本没有可用 ZIP 时会明确报错。
+- 原版支持官方源 / [BMCLAPI 镜像](https://bmclapidoc.bangbang93.com/)，选择镜像时失败会回退官方源。该选项只影响支持映射的原版文件；Modrinth、加载器、Java 和 Forge 安装器使用各自下载服务。
+- 原版及加载器核对 SHA-1；Modrinth 文件核对提供的 SHA-1 / SHA-512；Java ZIP 核对 SHA-256，复用部署时核对每个文件。ZIP 路径、链接、重复名称及解压大小受检查。
+- 默认 6 个下载任务，网络失败重试 3 次；已完成且校验正确的文件可复用。不支持未完成单个文件的 HTTP Range 断点续传。
+- 整合包在临时目录组装，完成后才显示新实例；失败可保留已完成的原版、Java 和缓存。失败追加资源时，已校验的新增文件可能保留，可重试完成；程序不会覆盖预先存在的不同内容文件。
+- 取消等待当前网络读取结束；Forge / NeoForge 安装器会停止。强制终止程序可能留下临时文件；确认无下载任务后可清理 `.craftfetch/staging` 和 `.craftfetch-` 临时文件。缓存可在关闭程序后清理，之后下载将重新获取文件。
+- 没有标准资源索引的远古版本不支持；非必需依赖、加载器以外的特殊安装步骤、任意历史整合包及所有 PCL 版本不能保证通用兼容。
+
+## 从源码运行
+
+需要 Python 3.10+ 和 Tkinter（Linux 通常另装 `python3-tk`）。普通用户直接使用上面的一键安装包。
 
 ```sh
 python -m pip install -r requirements.txt
 python -m craftfetch
 ```
 
-## 命令行（可选）
+## 命令行
 
 ```sh
-# 列出正式版本
-python -m craftfetch --list
-
-# 列出正式版和快照 / 预览版
-python -m craftfetch --list --snapshots
-
-# 查看计划，不写入游戏目录
+# 原版计划（只读）
 python -m craftfetch --version 1.20.1 --directory "D:/Games/.minecraft" --plan
 
-# 使用 BMCLAPI 镜像安装（镜像失败时尝试官方源）
-python -m craftfetch --version 1.20.1 --directory "D:/Games/.minecraft" --source bmclapi
+# 创建 Fabric 隔离实例并自动部署 Java
+python -m craftfetch --version 1.20.1 --loader fabric --instance My-Fabric --directory "D:/Games/.minecraft"
+
+# 搜索 Modrinth 项目
+python -m craftfetch --search sodium --type mod --version 1.20.1 --loader fabric
+
+# 将 Mod 及必需依赖安装到目标实例
+python -m craftfetch --project sodium --type mod --instance My-Fabric --directory "D:/Games/.minecraft"
+
+# 在线安装整合包 / 导入本地整合包
+python -m craftfetch --project fabulously-optimized --type modpack --version 1.20.1 --loader fabric --instance My-Pack --directory "D:/Games/.minecraft"
+python -m craftfetch --pack "D:/Downloads/example.mrpack" --instance My-Pack --directory "D:/Games/.minecraft"
+
+# 存档中安装数据包
+python -m craftfetch --project terralith --type datapack --instance My-Fabric --world "New World" --directory "D:/Games/.minecraft"
+
+# 单独部署 Java
+python -m craftfetch --java 21 --directory "D:/Games/.minecraft"
 ```
 
-`--workers` 可设置为 1–16。`--plan` 会读取在线元数据和资源索引，不下载游戏文件。
+可选参数：`--source bmclapi`、`--workers 1..16`、`--loader-version`、`--resource-version`（Modrinth 版本 ID）、`--include-optional`、`--no-java`。不带 `--instance` 的原版下载命令保留旧版目录行为；Forge / NeoForge 安装仍需 Java。
 
-## 测试和打包
+## 测试和构建
 
 ```sh
 python -m unittest discover -s tests -v
-
-# 需要桌面显示环境；Linux 可使用 xvfb-run
 python -m tests.gui_smoke
-
-# 真实 CDN 抽样验证（下载本体、依赖、本地库、索引、资源各一份，临时目录自动清理）
-python -m tools.live_smoke --version 1.20.1
-
-# 必须在目标系统上构建对应系统的程序
+python -m tools.content_smoke --report artifacts/content-live.json
+# Windows 上额外执行真实 Forge / NeoForge 安装
+python -m tools.content_smoke --forge --report artifacts/content-live-windows.json
 python -m pip install -r requirements-build.txt
 python -m PyInstaller --clean --noconfirm --onefile --windowed --name CraftFetch --collect-all certifi run.py
-
-# Windows 上额外生成一键安装包（需要 Inno Setup 6.3 或更新版本）
+# Windows 需 Inno Setup 6.3+
 python -m tools.build_installer
 ```
 
-Windows 构建结果为 `dist/CraftFetch.exe`。`.exe` 自带 Python 和 Tkinter，用户不需要安装 Python。macOS / Linux 的产物分别对应其构建系统，不能当成 Windows 程序使用。桌面打包默认不带控制台，命令行使用建议直接运行源码。
+[构建工作流](.github/workflows/build.yml)运行跨平台测试和打包，并验证 Windows 一键安装、自动启动、再次安装和卸载。网络集成验证单独记录结果。未签名的程序可能出现系统来源提示。
 
-[构建工作流](.github/workflows/build.yml)会在 Windows、macOS、Linux 上运行测试、检查界面并构建程序，生成含程序、说明、许可的便携 ZIP 和 SHA-256 文件。Windows 还会生成一键安装 EXE 和 SHA-256 文件，并实际验证点击一次安装、自动启动、快捷方式、再次安装和卸载。所有产物放在 Actions 的 Artifacts 中。工作流**不会自动发布 GitHub Release**。未签名的程序可能触发系统的来源确认。
+## 来源与许可
 
-## 数据来源与许可
+- [Mojang 版本列表](https://piston-meta.mojang.com/mc/game/version_manifest_v2.json)、官方 CDN 与用户选择的 BMCLAPI。
+- [Modrinth 公共 API](https://docs.modrinth.com/api/) 和 [.mrpack 格式](https://support.modrinth.com/en/articles/8802351-modrinth-modpack-format-mrpack)。文件按作者提供的下载地址获取，项目不重新分发它们。
+- [Fabric Meta](https://meta.fabricmc.net/)、[Quilt Meta](https://meta.quiltmc.org/)、[Forge 安装器](https://github.com/MinecraftForge/Installer/tree/2.0)、[NeoForge Maven](https://maven.neoforged.net/)。
+- [Eclipse Adoptium API](https://api.adoptium.net/)：Java 包内保留原始许可文件。
+- 下载器代码使用 [MIT 许可](LICENSE)。游戏、Mod、资源、运行时和依赖各自遵循原有许可；本项目的 MIT 许可不覆盖它们。
 
-- 版本列表：[Mojang 官方 version_manifest_v2.json](https://piston-meta.mojang.com/mc/game/version_manifest_v2.json)。版本元数据和资源索引 URL 取自这份清单。
-- 游戏文件与依赖：Mojang / Minecraft 官方 CDN，或用户主动选择的 [BMCLAPI](https://bmclapidoc.bangbang93.com/) 镜像（维护者 bangbang93）。界面保留镜像来源说明。
-- 下载器代码使用 [MIT 许可](LICENSE)。游戏、第三方依赖库和镜像服务分别遵循其原有条款；本项目的 MIT 许可不覆盖它们。
-- 工具负责文件安装，不验证或授予 Minecraft 使用权，也不替代购买和账号登录。
+CraftFetch 与 PCL、Mojang、Microsoft 无隶属关系。项目不包含 PCL 源码、游戏二进制或账号凭据；不验证或授予 Minecraft 使用权。

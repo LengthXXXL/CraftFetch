@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "craftfetch"
-version = "0.1.1"
-description = "Standalone Minecraft Java vanilla downloader for standard launcher directories"
+version = "0.2.0"
+description = "Minecraft content, modpack, loader and Java downloader for standard launcher directories"
 requires-python = ">=3.10"
 dependencies = ["certifi>=2024.8.30,<2027"]
 license = "MIT"
