@@ -140,7 +140,13 @@ def install_loader(client, root, base, loader, version, java):
                         client.cancel.wait(0.2)
                 finally:
                     if process.poll() is None:
-                        process.terminate()
+                        if os.name == "nt":
+                            # Forge processors may be child JVMs; stop the whole tree.
+                            subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"],
+                                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                           creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0), timeout=15)
+                        else:
+                            process.terminate()
                         try:
                             process.wait(timeout=10)
                         except subprocess.TimeoutExpired:

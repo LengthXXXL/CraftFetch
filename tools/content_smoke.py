@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 import tempfile
 import time
+import sys
 import zipfile
 
 from craftfetch.catalog import Catalog, primary_file, remote_file
@@ -23,6 +24,8 @@ from craftfetch.runtime import install_java
 
 
 def main():
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8')
     parser = argparse.ArgumentParser()
     parser.add_argument('--forge', action='store_true')
     parser.add_argument('--pack-install', action='store_true', help='also install an entire real modpack including vanilla assets')
@@ -44,7 +47,7 @@ def main():
         world = instance / 'saves/Test world'
         world.mkdir(parents=True)
         (world / 'level.dat').write_bytes(b'test fixture; not a playable save')
-        for kind, slug in [('mod', 'sodium'), ('resourcepack', 'fresh-animations'), ('shader', 'complementary-reimagined'), ('datapack', 'terralith')]:
+        for kind, slug in [('mod', 'iris'), ('resourcepack', 'fresh-animations'), ('shader', 'complementary-reimagined'), ('datapack', 'terralith')]:
             hits = catalog.search(slug, kind, '1.20.1', 'fabric')['hits']
             assert hits, (kind, 'no search hits')
             versions = catalog.versions(slug, '1.20.1', 'fabric', kind)

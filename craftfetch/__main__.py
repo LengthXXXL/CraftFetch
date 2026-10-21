@@ -2,12 +2,16 @@ import argparse
 import json
 from pathlib import Path
 import sys
+import zipfile
 
 from . import __version__
 from .core import Cancelled, DownloadError, Downloader
 
 
 def main():
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, 'reconfigure'):
+            stream.reconfigure(encoding='utf-8')
     parser = argparse.ArgumentParser(description="CraftFetch：游戏、Mod、整合包、数据包、资源包、光影及 Java 下载器（Windows x64）")
     parser.add_argument('--list', action='store_true', help='列出原版正式版本')
     parser.add_argument('--snapshots', action='store_true', help='包含快照 / 预览版')
@@ -115,7 +119,7 @@ def main():
         client.cancel.set()
         print('任务已中断，再次运行会校验并复用完整文件。', file=sys.stderr)
         return 130
-    except (DownloadError, Cancelled, OSError, KeyError, ValueError) as exc:
+    except (DownloadError, Cancelled, OSError, KeyError, ValueError, zipfile.BadZipFile) as exc:
         print(f'错误：{exc}', file=sys.stderr)
         return 1
 
