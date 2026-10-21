@@ -37,22 +37,41 @@ try {
     $process = Start-Process $setup[0].FullName -ArgumentList @('/NORESTART', "/LOG=$env:RUNNER_TEMP/craftfetch-install.log") -PassThru
     $deadline = (Get-Date).AddSeconds(45)
     $button = $null
-    $windowCondition = [System.Windows.Automation.PropertyCondition]::new(
-        [System.Windows.Automation.AutomationElement]::NameProperty, 'CraftFetch 安装')
     $buttonCondition = [System.Windows.Automation.PropertyCondition]::new(
         [System.Windows.Automation.AutomationElement]::ControlTypeProperty,
         [System.Windows.Automation.ControlType]::Button)
     while ((Get-Date) -lt $deadline -and $null -eq $button) {
-        $window = [System.Windows.Automation.AutomationElement]::RootElement.FindFirst(
-            [System.Windows.Automation.TreeScope]::Children, $windowCondition)
-        if ($null -ne $window) {
-            foreach ($element in $window.FindAll([System.Windows.Automation.TreeScope]::Descendants, $buttonCondition)) {
-                if ($element.Current.Name -like '*一键安装*') { $button = $element; break }
+        $windows = [System.Windows.Automation.AutomationElement]::RootElement.FindAll(
+            [System.Windows.Automation.TreeScope]::Children,
+            [System.Windows.Automation.Condition]::TrueCondition)
+        foreach ($window in $windows) {
+            if ($window.Current.Name -like '*CraftFetch*') {
+                foreach ($element in $window.FindAll([System.Windows.Automation.TreeScope]::Descendants, $buttonCondition)) {
+                    if ($element.Current.Name -like '*一键安装*') { $button = $element; break }
+                }
             }
+            if ($null -ne $button) { break }
         }
         if ($null -eq $button) { Start-Sleep -Milliseconds 300 }
     }
-    if ($null -eq $button) { throw 'One-click install button did not appear' }
+    if ($null -eq $button) {
+        foreach ($window in $windows) {
+            Write-Output "Window: $($window.Current.Name)"
+            foreach ($element in $window.FindAll([System.Windows.Automation.TreeScope]::Descendants, $buttonCondition)) {
+                Write-Output "Button: $($element.Current.Name)"
+            }
+        }
+        throw 'One-click install button did not appear'
+    }
+    Add-Type -AssemblyName System.Windows.Forms
+    Add-Type -AssemblyName System.Drawing
+    $screen = [System.Windows.Forms.SystemInformation]::VirtualScreen
+    $bitmap = New-Object System.Drawing.Bitmap($screen.Width, $screen.Height)
+    $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
+    $graphics.CopyFromScreen($screen.Left, $screen.Top, 0, 0, $bitmap.Size)
+    $bitmap.Save((Join-Path $repo 'artifacts/installer-ready.png'))
+    $graphics.Dispose()
+    $bitmap.Dispose()
     $button.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern).Invoke()
     if (-not $process.WaitForExit(90000)) { throw 'Installer did not finish after one click' }
     if ($process.ExitCode -ne 0) { throw "Install failed: $($process.ExitCode)" }
