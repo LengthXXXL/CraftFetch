@@ -180,12 +180,13 @@ class CoreTests(unittest.TestCase):
         except OSError:
             return
         original = Path.resolve
+        expected = original(self.root / 'libraries/a.jar')
         def resolve(path, *args, **kwargs):
             if path == self.root:
                 return alias
             return original(path, *args, **kwargs)
         with patch.object(Path, 'resolve', resolve):
-            self.assertEqual(safe_path(self.root, 'libraries/a.jar'), self.root / 'libraries/a.jar')
+            self.assertEqual(safe_path(self.root, 'libraries/a.jar'), expected)
 
     def test_rules_use_last_matching_action(self):
         self.assertTrue(library_allowed({}))
