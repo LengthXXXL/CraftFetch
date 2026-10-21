@@ -5,10 +5,16 @@
 ## 0.2.0 开发验证（2026-10-22）
 
 - 用户已反馈：0.1.x 下载的原版目录可以导入 PCL 并打开游戏。这是用户提供的实机结果。
-- 本地 Python 3.10：资源类型与隔离目录、数据包存档、必需依赖、加载器冲突、整合包客户端环境与覆盖顺序、失败不发布实例、Java 校验 / 复用 / 修复、ZIP 路径检查等模拟测试通过。
+- 本地 Python 3.10：43 项测试通过，包含资源类型与隔离目录、数据包存档、必需依赖与循环、加载器冲突、整合包客户端环境与覆盖顺序、失败不发布实例、Java 校验 / 复用 / 修复、ZIP 路径检查、Windows 路径别名和新版 MC 的 NeoForge 版本选择。
 - 新版 Tkinter 三个页面启动与主线程消息处理检查通过；实例选择可填写 MC / 加载器筛选及存档列表。
 - 真实 Modrinth 下载：Sodium、Fresh Animations、Complementary Reimagined、Terralith 各一份文件成功下载、校验并写入预期的隔离目录 / 指定存档目录。
 - Java 16 的 JRE 接口无包；JDK 接口仍提供 Windows x64 ZIP，自动回退路径已加入测试。
+- 本地真实下载 Fabric 0.16.14 的 8 个依赖、Quilt 0.28.1 的 11 个依赖并完成校验；解析 Fabulously Optimized 5.4.1 整合包得到 51 个客户端文件、27 个覆盖文件。
+- 真实 Temurin Java 17 Windows x64 ZIP 下载、SHA-256 校验、部署及逐文件校验后复用成功。一次下载完整性校验失败，自动重试成功；本地网络验证总计约 360 秒。
+- [GitHub Actions 39633611817](https://github.com/LengthXXXL/CraftFetch/actions/runs/39633611817)，构建代码 `d6d4d5a`：Windows / macOS / Linux 的 43 项测试、GUI 冒烟检查及打包全部成功；Windows 一键安装、自动启动、快捷方式、重装和卸载检查全部通过。
+- 同一构建在 Windows 执行真实网络集成测试：Iris 与其固定 Sodium 依赖、Fresh Animations、Complementary Reimagined、Terralith 下载成功；Fabric 0.16.14（8 库）、Quilt 0.28.1（11 库）、Forge 47.4.0（29 库）、NeoForge 21.1.172（47 库）完成安装与依赖校验。Java 17 / 21 实际部署，Java 17 再次校验复用成功。
+- Fabulously Optimized 5.4.1 在 Windows 完整安装成功，原版 1.20.1 的 3641 个文件校验完成，整合包实例内生成 48 个 Mod JAR、配置覆盖文件、独立版本 JSON / JAR 与导入说明。整段网络集成测试约 111.7 秒；报告保存在 Actions 的 `CraftFetch-content-integration` Artifact 中。
+- Windows 安装包：14,980,409 字节，SHA-256 `aff23796c5928724584fc3206665453c86c6ab7ace2c8a0e333791b8345ae1ef`。便携 ZIP：12,965,727 字节，SHA-256 `bb903da563c87b40ff5e399af31b2cdb339050398aff2b09b9fe857be675a9d2`。
 - 新功能在 PCL 内实际启动的兼容性仍需 Windows 用户验证；安装器 / 文件结构验证不代表实际运行所有 Mod 或整合包。
 
 ## 本地已完成
