@@ -173,6 +173,20 @@ class CoreTests(unittest.TestCase):
         with InstallLock(self.root):
             pass
 
+    def test_root_alias_uses_directory_identity(self):
+        alias = self.root / 'alias'
+        try:
+            alias.symlink_to(self.root, target_is_directory=True)
+        except OSError:
+            return
+        original = Path.resolve
+        def resolve(path, *args, **kwargs):
+            if path == self.root:
+                return alias
+            return original(path, *args, **kwargs)
+        with patch.object(Path, 'resolve', resolve):
+            self.assertEqual(safe_path(self.root, 'libraries/a.jar'), self.root / 'libraries/a.jar')
+
     def test_rules_use_last_matching_action(self):
         self.assertTrue(library_allowed({}))
         self.assertFalse(library_allowed({"rules": []}))

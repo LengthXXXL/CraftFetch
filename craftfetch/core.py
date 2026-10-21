@@ -44,8 +44,19 @@ def safe_path(root: Path, relative: str) -> Path:
     ):
         raise DownloadError(f"不安全的文件路径：{relative!r}")
     target = root.joinpath(*parts).resolve()
-    if root.resolve() not in target.parents:
-        raise DownloadError(f"文件路径越出了游戏目录：{relative!r}")
+    resolved_root = root.resolve()
+    if resolved_root not in target.parents:
+        # Windows may resolve a newly created parent using its 8.3 alias while
+        # another thread sees the long name. Compare directory identities only
+        # on the fallback path; escaping symlinks still cannot match the root.
+        for parent in target.parents:
+            try:
+                if os.path.samefile(resolved_root, parent):
+                    break
+            except OSError:
+                continue
+        else:
+            raise DownloadError(f"文件路径越出了游戏目录：{relative!r}（{target}；根目录 {resolved_root}）")
     return target
 
 

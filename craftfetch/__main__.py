@@ -34,6 +34,8 @@ def main():
     parser.add_argument('--include-optional', action='store_true', help='包含整合包的客户端可选文件')
     parser.add_argument('--app-version', action='version', version=__version__)
     args = parser.parse_args()
+    if args.directory is not None:
+        args.directory = args.directory.expanduser().resolve()
     actions = [args.list, args.java is not None, args.search is not None, bool(args.project), bool(args.pack)]
     if not any(actions) and not args.version:
         from .gui import main as gui

@@ -59,8 +59,12 @@ def choose_loader(client, loader, game, version=""):
             return result
     if loader == "neoforge":
         parts = game.split(".")
+        prefix = ""
         if len(parts) >= 2 and parts[0] == "1":
             prefix = parts[1] + "." + (parts[2] if len(parts) > 2 else "0") + "."
+        elif len(parts) in (2, 3) and all(p.isdigit() for p in parts) and int(parts[0]) >= 26:
+            prefix = game + (".0" if len(parts) == 2 else "") + "."
+        if prefix:
             xml = client.small_bytes("https://maven.neoforged.net/releases/net/neoforged/neoforge/maven-metadata.xml", 4 * 1024 ** 2)
             versions = [v.text for v in ET.fromstring(xml).findall("./versioning/versions/version")
                         if v.text and v.text.startswith(prefix) and re.fullmatch(r"[0-9.]+", v.text)]

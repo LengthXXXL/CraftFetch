@@ -10,7 +10,7 @@ import zipfile
 from craftfetch.catalog import API, Catalog, version_kind
 from craftfetch.core import Cancelled, DownloadError, Downloader, File
 from craftfetch.instances import create_instance, read_instance
-from craftfetch.loaders import merge_profile, library_file
+from craftfetch.loaders import merge_profile, library_file, choose_loader
 from craftfetch.packs import inspect_pack, install_pack
 from craftfetch.runtime import ADOPTIUM, install_java, java_major
 from tests.test_core import Response
@@ -310,6 +310,13 @@ class ContentTests(unittest.TestCase):
         with self.assertRaises(DownloadError):
             create_instance(self.client, self.root, '1.20.1', 'test')
         self.assertEqual(self.calls, [])
+
+    def test_neoforge_automatic_versions_support_new_minecraft_numbers(self):
+        url = 'https://maven.neoforged.net/releases/net/neoforged/neoforge/maven-metadata.xml'
+        self.payloads[url] = b'<metadata><versioning><versions><version>21.1.172</version><version>21.1.264</version><version>26.3.0.94</version><version>26.3.0.95</version><version>26.3.0.96-beta</version><version>26.3.1.1</version></versions></versioning></metadata>'
+        self.assertEqual(choose_loader(self.client, 'neoforge', '1.21.1'), '21.1.264')
+        self.assertEqual(choose_loader(self.client, 'neoforge', '26.3'), '26.3.0.95')
+        self.assertEqual(choose_loader(self.client, 'neoforge', '26.3.1'), '26.3.1.1')
 
 
 if __name__ == '__main__':
