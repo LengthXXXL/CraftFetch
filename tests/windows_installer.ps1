@@ -32,36 +32,58 @@ function Assert-Installed {
 }
 
 try {
-    Add-Type -AssemblyName UIAutomationClient
-    Add-Type -AssemblyName UIAutomationTypes
+    # Inno's VCL buttons do not expose UI Automation InvokePattern reliably.
+    # Locate the visible native button by its text and invoke its actual click.
+    Add-Type @'
+using System;
+using System.Text;
+using System.Runtime.InteropServices;
+public static class CraftFetchInstallerUi {
+    private delegate bool EnumProc(IntPtr window, IntPtr data);
+    [DllImport("user32.dll")] private static extern bool EnumWindows(EnumProc callback, IntPtr data);
+    [DllImport("user32.dll")] private static extern bool EnumChildWindows(IntPtr parent, EnumProc callback, IntPtr data);
+    [DllImport("user32.dll", CharSet=CharSet.Unicode)] private static extern int GetWindowText(IntPtr window, StringBuilder text, int count);
+    [DllImport("user32.dll", CharSet=CharSet.Unicode)] private static extern int GetClassName(IntPtr window, StringBuilder text, int count);
+    [DllImport("user32.dll")] private static extern bool IsWindowVisible(IntPtr window);
+    [DllImport("user32.dll")] private static extern bool IsWindowEnabled(IntPtr window);
+    [DllImport("user32.dll")] private static extern bool SetForegroundWindow(IntPtr window);
+    [DllImport("user32.dll")] private static extern IntPtr SendMessage(IntPtr window, uint message, IntPtr w, IntPtr l);
+    public static string Text(IntPtr window) {
+        var text = new StringBuilder(1024);
+        GetWindowText(window, text, text.Capacity);
+        return text.ToString();
+    }
+    public static IntPtr FindButton() {
+        IntPtr result = IntPtr.Zero;
+        EnumWindows((window, data) => {
+            if (IsWindowVisible(window) && Text(window).Contains("CraftFetch")) {
+                EnumChildWindows(window, (child, unused) => {
+                    var name = new StringBuilder(128);
+                    GetClassName(child, name, name.Capacity);
+                    if (IsWindowVisible(child) && IsWindowEnabled(child) &&
+                        name.ToString().Contains("Button") && Text(child).Contains("一键安装")) {
+                        SetForegroundWindow(window);
+                        result = child;
+                        return false;
+                    }
+                    return true;
+                }, IntPtr.Zero);
+            }
+            return result == IntPtr.Zero;
+        }, IntPtr.Zero);
+        return result;
+    }
+    public static void Click(IntPtr button) {
+        SendMessage(button, 0x00F5, IntPtr.Zero, IntPtr.Zero); // BM_CLICK
+    }
+}
+'@
     $process = Start-Process $setup[0].FullName -ArgumentList @('/NORESTART', "/LOG=$env:RUNNER_TEMP/craftfetch-install.log") -PassThru
     $deadline = (Get-Date).AddSeconds(45)
-    $button = $null
-    $buttonCondition = [System.Windows.Automation.PropertyCondition]::new(
-        [System.Windows.Automation.AutomationElement]::ControlTypeProperty,
-        [System.Windows.Automation.ControlType]::Button)
-    while ((Get-Date) -lt $deadline -and $null -eq $button) {
-        $windows = [System.Windows.Automation.AutomationElement]::RootElement.FindAll(
-            [System.Windows.Automation.TreeScope]::Children,
-            [System.Windows.Automation.Condition]::TrueCondition)
-        foreach ($window in $windows) {
-            if ($window.Current.Name -like '*CraftFetch*') {
-                foreach ($element in $window.FindAll([System.Windows.Automation.TreeScope]::Descendants, $buttonCondition)) {
-                    if ($element.Current.Name -like '*一键安装*') { $button = $element; break }
-                }
-            }
-            if ($null -ne $button) { break }
-        }
-        if ($null -eq $button) { Start-Sleep -Milliseconds 300 }
-    }
-    if ($null -eq $button) {
-        foreach ($window in $windows) {
-            Write-Output "Window: $($window.Current.Name)"
-            foreach ($element in $window.FindAll([System.Windows.Automation.TreeScope]::Descendants, $buttonCondition)) {
-                Write-Output "Button: $($element.Current.Name)"
-            }
-        }
-        throw 'One-click install button did not appear'
+    $button = [IntPtr]::Zero
+    while ((Get-Date) -lt $deadline -and $button -eq [IntPtr]::Zero) {
+        $button = [CraftFetchInstallerUi]::FindButton()
+        if ($button -eq [IntPtr]::Zero) { Start-Sleep -Milliseconds 300 }
     }
     Add-Type -AssemblyName System.Windows.Forms
     Add-Type -AssemblyName System.Drawing
@@ -72,7 +94,9 @@ try {
     $bitmap.Save((Join-Path $repo 'artifacts/installer-ready.png'))
     $graphics.Dispose()
     $bitmap.Dispose()
-    $button.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern).Invoke()
+    if ($button -eq [IntPtr]::Zero) { throw 'One-click install button did not appear' }
+    Write-Output "Clicking native installer button: $([CraftFetchInstallerUi]::Text($button))"
+    [CraftFetchInstallerUi]::Click($button)
     if (-not $process.WaitForExit(90000)) { throw 'Installer did not finish after one click' }
     if ($process.ExitCode -ne 0) { throw "Install failed: $($process.ExitCode)" }
     Assert-Installed
