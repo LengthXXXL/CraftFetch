@@ -13,9 +13,18 @@
 - 本地 PyInstaller macOS arm64 打包成功。
 - [GitHub Actions 构建 39594617780](https://github.com/LengthXXXL/CraftFetch/actions/runs/39594617780)：Windows、macOS、Linux 三个平台的 16 项核心测试、界面冒烟测试、可执行程序打包和 ZIP / SHA-256 生成均成功。构建代码提交为 `121cfa5`。
 
+## 0.1.1 一键安装验证
+
+- [GitHub Actions 构建 39601590551](https://github.com/LengthXXXL/CraftFetch/actions/runs/39601590551)，代码提交 `6c30cd8`：三个系统的核心测试、界面冒烟测试和打包全部通过。
+- Windows 使用 Inno Setup 6.7.1 生成一键安装包，安装目标为当前用户目录，不请求管理员权限。
+- 在 Windows 上实际点击“一键安装”按钮，确认无需其他向导点击即可结束安装，并自动打开已安装下载器的桌面窗口。
+- 检查桌面 / 开始菜单快捷方式及其目标、程序文件、许可文件和卸载注册项均正确。
+- 再次安装和卸载均成功；卸载移除程序、快捷方式和卸载注册项，外部游戏目录中的样例文件保留。
+- 安装包和便携 ZIP 都生成并核对 SHA-256；安装界面截图保存在此构建的 Windows Artifact 中。
+
 ## 实机验证边界
 
 - 当前环境不是 Windows，尚未在 Windows 上启动游戏，也未在 PCL 2.99.0.0 中实测识别与启动。
 - 自动化构建对 Windows / macOS / Linux 的结果请查看仓库 Actions；构建通过也不等于完成 PCL 实机兼容测试。
 - 暂未验证每个历史版本、所有快照、网络代理环境或所有镜像节点。
-- 0.1.0 应作为早期测试版本使用。面向 Windows x64 的原版文件安装是首版范围，Java 和模组加载器不包含在内。
+- 0.1.x 应作为早期测试版本使用。面向 Windows x64 的原版文件安装是当前范围，Java 和模组加载器不包含在内。
