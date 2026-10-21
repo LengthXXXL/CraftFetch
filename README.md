@@ -2,6 +2,8 @@
 
 独立的 Minecraft Java 版原版下载器。将游戏文件安装到标准 `.minecraft` 目录，再由 PCL、PCL-CE 或其他支持此目录结构的启动器识别和启动。
 
+[下载 Windows x64 测试版](https://github.com/LengthXXXL/CraftFetch/releases/tag/v0.1.0) · [实际验证记录](VALIDATION.md)
+
 这是独立编写的第三方工具，与 PCL、Mojang、Microsoft 无隶属关系。项目不包含 PCL 源码、游戏二进制或账号凭据。
 
 ## 首版范围
