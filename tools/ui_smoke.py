@@ -16,10 +16,14 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--stay-open', action='store_true')
     parser.add_argument('--detail', action='store_true')
+    parser.add_argument('--geometry', help='native viewport for visual QA, e.g. 980x690')
+    parser.add_argument('--bottom', action='store_true', help='show the detail download controls for visual QA')
     parser.add_argument('--report', type=Path)
     args = parser.parse_args()
     root = tk.Tk()
     app = App(root)
+    if args.geometry:
+        root.geometry(args.geometry)
     start = time.monotonic()
     stage = 0
     errors = []
@@ -87,6 +91,8 @@ def main():
             return
         root.after(150, advance)
     def finish():
+        if args.bottom and args.detail:
+            root.after(100, lambda: app.detail_scroll.canvas.yview_moveto(1))
         report['seconds'] = round(time.monotonic()-start, 1)
         if args.report:
             args.report.parent.mkdir(parents=True, exist_ok=True)
