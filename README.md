@@ -2,7 +2,7 @@
 
 独立的 Minecraft Java 版下载器：原版、Mod、整合包、数据包、资源包、光影包、加载器和 Java。下载到标准 `.minecraft` 文件夹，再交给 PCL 或其他启动器启动。
 
-**[一键安装 Windows 64 位版](https://github.com/LengthXXXL/CraftFetch/releases/download/v0.2.0/CraftFetch-Setup-0.2.0-Windows-x64.exe)** · [发布页 / 便携版](https://github.com/LengthXXXL/CraftFetch/releases/tag/v0.2.0) · [验证记录](VALIDATION.md)
+**[一键安装 Windows 64 位版](https://github.com/LengthXXXL/CraftFetch/releases/download/v0.3.0/CraftFetch-Setup-0.3.0-Windows-x64.exe)** · [发布页 / 便携版](https://github.com/LengthXXXL/CraftFetch/releases/tag/v0.3.0) · [验证记录](VALIDATION.md)
 
 ## 一键安装
 
@@ -10,9 +10,9 @@
 
 ## 创建游戏或 Mod 实例
 
-1. 选择 PCL 使用的 `.minecraft` **根目录**，不要选其内部的 `versions` 文件夹。
-2. 在“游戏与加载器”中选 Minecraft 版本，再选 `vanilla`（原版）、`fabric`、`quilt`、`forge` 或 `neoforge`。
-3. 加载器版本留空时自动选择；也可填写准确版本号。填写一个新的实例名称，点击“创建并下载实例”。
+1. 点击顶部“目录设置”，选择 PCL 使用的 `.minecraft` **根目录**，不要选其内部的 `versions` 文件夹。
+2. 在左侧“原版”中选 Minecraft 版本，再选 `vanilla`（原版）、`fabric`、`quilt`、`forge` 或 `neoforge`。
+3. 核心版本留空时自动选择；也可填写准确版本号。填写一个新的实例名称，点击“下载并创建实例”。
 4. 默认按 Mojang 版本元数据部署对应的 Windows x64 Java，保存在游戏根目录的 `runtime` 内。
 5. 在 PCL 中添加 / 选择同一个游戏根目录，刷新版本，选择刚创建的实例。**在该版本设置中启用游戏目录隔离，使用版本文件夹。**
 6. 若 PCL 未自动发现 Java，在该版本的 Java 设置中选择程序显示的 `javaw.exe`。也可在“Java 管理”中复制路径。
@@ -21,20 +21,22 @@
 
 ## 下载 Mod、数据包、资源包和光影
 
-1. 进入“资源与整合包”，选择**目标实例**。MC 版本和加载器筛选会根据实例填写；若目录内没有实例，先创建一个。
-2. 选择资源类型，输入关键词后搜索。双击项目或点击“读取所选项目版本”，再选择具体版本。
-3. 点击“安装所选资源”。程序检查实际下载版本的类型、MC 版本和 Mod 加载器，并自动解析必需依赖；不会安装推荐 / 可选依赖。
-4. **数据包需要先在游戏里创建存档**，然后刷新本地实例、选择存档。数据包写入该存档的 `datapacks`，重新进入存档或使用 `/reload` 后加载。
-5. 资源包和光影包仍需在游戏设置中启用。光影需要匹配的 Iris / OptiFine 等支持，下载光影文件本身不会自动启用光影。
+1. 在左侧选择 **Mod、数据包、资源包或光影包**，查看热门项目或输入关键词搜索；可按游戏版本和加载器筛选，结果支持翻页。
+2. 图文列表显示作者图标、简介、下载量和更新日期。点击项目进入详情，查看作者提供的预览图（如有）。图片异步加载；图片暂不可用不影响资源安装。
+3. 在详情页选择游戏版本和 **Fabric / NeoForge / Forge / Quilt 等实际支持的核心**，再选择作者发布的具体版本；也可只显示正式版。筛选只列出该项目实际发布过的版本。
+4. 点击“来源网页 · Modrinth”会在系统浏览器打开原始项目页；作者提供源码地址时也可点击“作者源码”。
+5. 在详情页下方选择**目标实例**，点击“下载所选版本”。程序检查 MC 版本和加载器并自动解析必需依赖；不会安装推荐 / 可选依赖。目录内没有实例时先在“原版”中创建。
+6. **数据包需要先在游戏里创建存档**，然后在详情页刷新目标实例、选择存档。数据包写入该存档的 `datapacks`，重新进入存档或使用 `/reload` 后加载。
+7. 资源包和光影包仍需在游戏设置中启用。光影需要匹配的 Iris / OptiFine 等支持，下载光影文件本身不会自动启用光影。
 
-当前资源源为 **Modrinth**，无需 API Key。支持识别同一项目的 Mod / 数据包等不同发布形式。搜索显示前 30 个结果，可增加关键词缩小范围。Mod 应装入匹配加载器的实例；本工具不会因为下载一个 Mod 就把原版实例改成 Fabric / Forge。
+当前资源源为 **Modrinth**，无需 API Key。支持识别同一项目的 Mod / 数据包等不同发布形式。搜索每页显示 30 个结果。Mod 应装入匹配加载器的实例；本工具不会因为选择另一种核心筛选就更改已有实例的加载器。
 
 已有的同名不同内容文件会保留并报出冲突。对本工具记录过的资源，不会自动替换为其他版本，以避免残留两份 Mod；需要升级时请使用新实例，或先备份、移走旧文件并清理实例内 `craftfetch-content.json` 的对应记录。依赖版本冲突或明确的不兼容关系会报错；未记录的手动添加文件、作者未声明的冲突仍需自行判断。整合包内资源由整合包统一管理，追加资源时尤其应检查已有 Mod。
 
 ## 下载 / 导入整合包
 
-- 在线：选择“整合包”，设置 MC 版本和加载器筛选（可清空加载器），搜索项目、读取版本、填写**整合包新实例名**，安装。
-- 本地：填写整合包新实例名，点击“导入本地 .mrpack”。
+- 在线：左侧选择“整合包”，搜索并点击项目，在详情页选择作者版本、填写**新实例名称**后安装。
+- 本地：在“整合包”分类点击“导入本地 .mrpack”，选择文件后填写新实例名称。
 - 自动读取 `.mrpack` 中的原版和加载器版本，安装依赖及 Java，再下载客户端文件，应用 `overrides` 和 `client-overrides`。忽略独立服务器文件。
 - 默认跳过客户端可选文件；可勾选“包含整合包可选文件”将它们全部安装。
 - 完成后生成 PCL 可识别的独立版本目录，**无需再让 PCL 下载或导入整合包**。按上面的步骤选择目录、实例并启用版本隔离即可。
@@ -124,7 +126,7 @@ python -m tools.content_smoke --report artifacts/content-live.json
 # Windows 上额外执行真实 Forge / NeoForge 安装
 python -m tools.content_smoke --forge --report artifacts/content-live-windows.json
 python -m pip install -r requirements-build.txt
-python -m PyInstaller --clean --noconfirm --onefile --windowed --name CraftFetch --collect-all certifi run.py
+python -m PyInstaller --clean --noconfirm --onefile --windowed --name CraftFetch --collect-all certifi --collect-data craftfetch run.py
 # Windows 需 Inno Setup 6.3+
 python -m tools.build_installer
 ```
@@ -137,6 +139,7 @@ python -m tools.build_installer
 - [Modrinth 公共 API](https://docs.modrinth.com/api/) 和 [.mrpack 格式](https://support.modrinth.com/en/articles/8802351-modrinth-modpack-format-mrpack)。文件按作者提供的下载地址获取，项目不重新分发它们。
 - [Fabric Meta](https://meta.fabricmc.net/)、[Quilt Meta](https://meta.quiltmc.org/)、[Forge 安装器](https://github.com/MinecraftForge/Installer/tree/2.0)、[NeoForge Maven](https://maven.neoforged.net/)。
 - [Eclipse Adoptium API](https://api.adoptium.net/)：Java 包内保留原始许可文件。
+- 导航图标使用 Tabler Icons（MIT），图片解码使用 Pillow。许可见 [第三方声明](THIRD_PARTY_NOTICES.md)。项目图标和预览图在浏览时从作者地址获取，不打包重新分发。
 - 下载器代码使用 [MIT 许可](LICENSE)。游戏、Mod、资源、运行时和依赖各自遵循原有许可；本项目的 MIT 许可不覆盖它们。
 
 CraftFetch 与 PCL、Mojang、Microsoft 无隶属关系。项目不包含 PCL 源码、游戏二进制或账号凭据；不验证或授予 Minecraft 使用权。

@@ -67,6 +67,7 @@ StatusRunProgram=正在打开 CraftFetch…
 Source: "dist\CraftFetch.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "README.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "LICENSE"; DestDir: "{app}"; Flags: ignoreversion
+Source: "THIRD_PARTY_NOTICES.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "CHANGELOG.md"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]

@@ -56,7 +56,7 @@ jobs:
         if: runner.os != 'Linux'
         run: python tests/gui_smoke.py
       - name: Build desktop executable
-        run: python -m PyInstaller --clean --noconfirm --onefile --windowed --name CraftFetch --collect-all certifi run.py
+        run: python -m PyInstaller --clean --noconfirm --onefile --windowed --name CraftFetch --collect-all certifi --collect-data craftfetch run.py
       - name: Package executable and documentation
         shell: python
         run: |
@@ -68,7 +68,7 @@ jobs:
                   shutil.copy2(path, stage / path.name)
               else:
                   shutil.copytree(path, stage / path.name)
-          for name in ['README.md', 'LICENSE', 'CHANGELOG.md']:
+          for name in ['README.md', 'LICENSE', 'CHANGELOG.md', 'THIRD_PARTY_NOTICES.md']:
               shutil.copy2(name, stage / name)
           output = pathlib.Path('artifacts')
           output.mkdir()
